@@ -18,7 +18,7 @@ class Token:
         }
         '''
 
-        encoded_jwt = jwt.encode({"username": username}, secret, algorithm="HS256")
+        encoded_jwt = jwt.encode({"role": username}, secret, algorithm="HS256")
 
         print(encoded_jwt)
         
@@ -33,9 +33,10 @@ class Restricted:
         try:
             print(f"secret: {secret}")
             print(f"authorization: {authorization}")
+            authorization = str.replace(str(authorization), 'Bearer ', '')
             data = jwt.decode(authorization, secret, algorithms=["HS256"])
-        except:
-            e = sys.exc_info()[0]
+        except Exception as e:
+            #e = sys.exc_info()[0]
             print(f"Exception: {e}")
             return 'wrong token'
 

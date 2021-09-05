@@ -32,47 +32,49 @@ def url_health():
 def url_login():
     if request.method == 'GET':
 
-        #username = request.form['username']
-        #password = request.form['password']
         username = request.args.get('username')
         password = request.args.get('password')        
-        
-        
-        #print(f"username {username}, password {password}")
+    elif request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+
     
-        Conection_db = mysql.connector.connect( 
-            host='bootcamp-tht.sre.wize.mx', 
-            user= 'secret', 
-            passwd='noPow3r', 
-            port=3306, 
-            db='bootcamp_tht' )
-        cur = Conection_db.cursor()
+    #print(f"username {username}, password {password}")
 
-        cur.execute( "SELECT username, password, salt FROM users  WHERE username = %s", (username, ))
-        data = cur.fetchall()
-        if data:
-            row = data[0]
-            encrypted_password = row[1]
-            salt = str(row[2])
-            salted = str(password) + salt
-        
+    Conection_db = mysql.connector.connect( 
+        host='bootcamp-tht.sre.wize.mx', 
+        user= 'secret', 
+        passwd='noPow3r', 
+        port=3306, 
+        db='bootcamp_tht' )
+    cur = Conection_db.cursor()
 
-            #print(f"encrypted password {encrypted_password}")
-            salted = salted.encode('utf-8')
-            h = hashlib.sha512(salted)
-            encrypted =  h.hexdigest()
-            print(f"encrypted {encrypted}")
-            print(f"encrypted stored in the database: {encrypted_password}")
+    cur.execute( "SELECT username, password, salt FROM users  WHERE username = %s", (username, ))
+    data = cur.fetchall()
+    if data:
+        row = data[0]
+        encrypted_password = row[1]
+        salt = str(row[2])
+        salted = str(password) + salt
+    
 
-            if (encrypted == encrypted_password):
-                res = {
-                       "data": login.generate_token(username, password)
-                }
-            else:
-                res = None
-        else: 
-            print("No data")
-            res = {'Error': 'wrong credentials'}
+        #print(f"encrypted password {encrypted_password}")
+        salted = salted.encode('utf-8')
+        h = hashlib.sha512(salted)
+        encrypted =  h.hexdigest()
+        print(f"encrypted {encrypted}")
+        print(f"encrypted stored in the database: {encrypted_password}")
+
+        if (encrypted == encrypted_password):
+            res = {
+                    "data": login.generate_token(username, password)
+            }
+        else:
+            res = None
+    else: 
+        print("No data")
+        res = {'Error': 'wrong credentials'}
 
     
     return jsonify(res)
